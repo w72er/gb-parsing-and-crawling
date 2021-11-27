@@ -79,16 +79,16 @@ def parse_compensation(soup_compensation: element.Tag) -> (str, str, str):
         return None, None, None
 
     compensation = soup_compensation.text.replace('\u202f', '')
-    m = re.search("(?P<min>\d+) – (?P<max>\d+) (?P<currency>\w+\.{0,1})", compensation)
+    m = re.search(r'(?P<min>\d+) – (?P<max>\d+) (?P<currency>\w+\.?)', compensation)
     if m is not None:
         return float(m.group('min')), float(m.group('max')), m.group('currency')
 
-    m = re.search("от (?P<min>\d+) (?P<currency>\w+\.{0,1})", compensation)
+    m = re.search(r'от (?P<min>\d+) (?P<currency>\w+\.?)', compensation)
     if m is not None:
         return float(m.group('min')), None, m.group('currency')
 
     # 'до 4000 EUR'
-    m = re.search("до (?P<max>\d+) (?P<currency>\w+\.{0,1})", compensation)
+    m = re.search(r'до (?P<max>\d+) (?P<currency>\w+\.?)', compensation)
     if m is not None:
         return None, float(m.group('max')), m.group('currency')
 

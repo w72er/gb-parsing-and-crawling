@@ -1,0 +1,18 @@
+C:\Users\alexa\PycharmProjects\gb-parsing-and-crawling\venv\Scripts\python.exe C:/Users/alexa/PycharmProjects/gb-parsing-and-crawling/lesson-2/hw-task-1/main.py
+Enter job title: python
+Enter the page count from which you want to parse vacancies: 20
+python 20
+The vacancies were parsed from 11 pages.
+                                               title  ...                                    address
+0                       Backend-разработчик (Python)  ...          Новосибирск, Октябрьская и еще 1 
+1                                 Программист Python  ...                 Новосибирск, Речной вокзал
+2                       Программист Python/Fullstack  ...  Новосибирск, Площадь Гарина-Михайловского
+3                     Python Developer (AI Projects)  ...                                Новосибирск
+4  Инженер по автотестированию/QA Automation engi...  ...                                Новосибирск
+
+[5 rows x 8 columns]
+Index(['title', 'compensation_min', 'compensation_max',
+       'compensation_currency', 'link', 'site', 'employer', 'address'],
+      dtype='object')
+
+Process finished with exit code 0
