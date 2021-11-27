@@ -13,16 +13,16 @@
 # расположение). Структура должна быть одинаковая для вакансий с обоих сайтов.
 # Общий результат можно вывести с помощью dataFrame через pandas. Сохраните в
 # json либо csv.
-from pprint import pprint
 import requests
 from bs4 import BeautifulSoup, element
 import re
+from pandas import json_normalize
 
-# https://novosibirsk.hh.ru/search/vacancy?area=4&fromSearchLine=true&text=python
-url = 'https://novosibirsk.hh.ru/search/vacancy'
+vacancies_csv = 'vacancies.csv'
 
 
 def parse_hh_ru_vacancies(job_title: str, page_count: int) -> list:
+    url = 'https://novosibirsk.hh.ru/search/vacancy'
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.45 Safari/537.36'}
     page_number = 1
@@ -45,14 +45,21 @@ def parse_hh_ru_vacancies(job_title: str, page_count: int) -> list:
             soup_title = soup_vacancy.find('a', attrs={'data-qa': 'vacancy-serp__vacancy-title'})
             soup_compensation = soup_vacancy.find('span', attrs={'data-qa': 'vacancy-serp__vacancy-compensation'})
             compensation_min, compensation_max, compensation_currency = parse_compensation(soup_compensation)
+            link = soup_title['href'].split('?')[0]
+            soup_employer = soup_vacancy.find('a', {'data-qa': 'vacancy-serp__vacancy-employer'})
+            employer_name = soup_employer.text.replace('\xa0', ' ')
+            soup_address = soup_vacancy.find('div', {'data-qa': 'vacancy-serp__vacancy-address'})
+            address = soup_address.text.replace('\xa0', ' ')
 
             vacancies.append({
                 'title': soup_title.text,
                 'compensation_min': compensation_min,
                 'compensation_max': compensation_max,
                 'compensation_currency': compensation_currency,
-                'link': soup_title['href'],
-                'site': 'hh.ru'
+                'link': link,
+                'site': 'hh.ru',
+                'employer_name': employer_name,
+                'address': address
             })
 
         is_last_page = soup.find('a', {'data-qa': 'pager-next'}) is None
@@ -95,5 +102,7 @@ if __name__ == '__main__':
 
     vacancies = parse_hh_ru_vacancies(job_title, page_count)
 
-    pprint(vacancies)
-    print(f'vacancy count: {len(vacancies)}')
+    df = json_normalize(vacancies)
+    print(df.head())
+    print(df.columns)
+    df.to_csv(vacancies_csv, index=False)
