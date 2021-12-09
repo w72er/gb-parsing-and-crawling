@@ -45,12 +45,12 @@ class GbDbEmails:
 
 if __name__ == '__main__':
     with GbDbEmails() as emails_db:
-        emails_db.emails.drop()
-        # emails_db.emails.delete_many({})
-        emails_db.create_indexes()
-        emails_db.add([{'id': '1'}])
-        emails_db.add([{'id': '1'}])
-        emails_db.add([{'id': '2'}])
-        emails_db.has_email('2')
+        # emails_db.emails.drop()
+        # # emails_db.emails.delete_many({})
+        # emails_db.create_indexes()
+        # emails_db.add([{'id': '1'}])
+        # emails_db.add([{'id': '1'}])
+        # emails_db.add([{'id': '2'}])
+        # emails_db.has_email('2')
         for email in emails_db.get_all_emails():
-            pprint(email)
+            print(f'{email["id"]} {email["date"]} {email["contact"]} {email["subject"][:30]}')
