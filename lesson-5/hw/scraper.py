@@ -36,7 +36,6 @@ def get_next_element(href):
         i_href = element.get_attribute('href')
         if i_href == href:
             return elements[i + 1] if i < len(elements) - 1 else None
-            # return elements[i + 1]
         i += 1
 
 
@@ -78,6 +77,10 @@ def get_email(driver: webdriver.Chrome):
     }
 
 
+def get_email_id_from_email_url(url: str) -> str:
+    return url.split('/')[4]
+
+
 def get_all_email_links(driver: webdriver.Chrome):
     links = set()
     last_href = None
@@ -111,8 +114,10 @@ if __name__ == '__main__':
     links = list(links)
     print(f'len: {len(links)}')
     for link in links[:4]:
+        email_id = get_email_id_from_email_url(link)
         driver.get(link)
         email = get_email(driver)
-        pprint(email)
+        email['id'] = email_id
+        print(f'{email["id"]} {email["date"]} {email["contact"]} {email["subject"][:30]}')
     driver.quit()
 
