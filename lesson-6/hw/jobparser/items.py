@@ -8,5 +8,11 @@ import scrapy
 
 class JobparserItem(scrapy.Item):
     # define the fields for your item here like:
-    # name = scrapy.Field()
-    pass
+    name = scrapy.Field()
+    salary = scrapy.Field()
+    link = scrapy.Field()
+    min = scrapy.Field()
+    max = scrapy.Field()
+    cur = scrapy.Field()
+    _id = scrapy.Field()  # todo: почему у меня без этого поля создается?
+
