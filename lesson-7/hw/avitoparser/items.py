@@ -5,8 +5,9 @@
 from itemloaders.processors import MapCompose, TakeFirst
 import scrapy
 
+
 def clear_price(value):
-    value = value.replace('\xa0', '')
+    value = value.replace(' ', '')
     try:
         return int(value)
     except:
@@ -25,4 +26,4 @@ class LeroymerlinruItem(scrapy.Item):
     name = scrapy.Field(output_processor=TakeFirst())
     photos = scrapy.Field()
     url = scrapy.Field(output_processor=TakeFirst())
-    price = scrapy.Field(output_processor=TakeFirst())
+    price = scrapy.Field(output_processor=TakeFirst(), input_processor=MapCompose(clear_price))

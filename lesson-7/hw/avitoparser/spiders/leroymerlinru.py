@@ -25,8 +25,8 @@ class LeroymerlinruSpider(scrapy.Spider):
     @staticmethod
     def parse_product(response: HtmlResponse):
         loader = ItemLoader(item=LeroymerlinruItem(), response=response)
-        loader.add_xpath('name', '//h1[@itemprop="name"]')  # название
-        loader.add_value('photos', 'photos')  # loader.add_xpath('photos', 'xpath')  # все фото
+        loader.add_xpath('name', '//h1[@itemprop="name"]/text()')  # название
+        loader.add_xpath('photos', '//source[contains(@srcset, "w_2000")]/@data-origin')  # все фото
         loader.add_value('url', response.url)  # ссылка
-        loader.add_xpath('price', '//span[@slot="price"]')  # цена
+        loader.add_xpath('price', '//span[@slot="price"]/text()')  # цена
         yield loader.load_item()

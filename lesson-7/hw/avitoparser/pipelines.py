@@ -10,7 +10,7 @@ from itemadapter import ItemAdapter
 from scrapy.pipelines.images import ImagesPipeline
 
 
-class LeroymerlinruSpiderPipeline:
+class LeroymerlinruParserPipeline:
     def process_item(self, item, spider):
         print(dict(item))
         return item
