@@ -11,6 +11,7 @@ if __name__ == '__main__':
 
     process = CrawlerProcess(settings=crawler_settings)
     # search = input('')
-    process.crawl(AvitoSpider, search="квартиры")
+    search = 'вафли+say+cheese'  # "квартиры"
+    process.crawl(AvitoSpider, search=search)
     process.start()
 
