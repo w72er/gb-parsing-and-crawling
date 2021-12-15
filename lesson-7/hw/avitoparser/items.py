@@ -19,3 +19,10 @@ class AvitoparserItem(scrapy.Item):
     price = scrapy.Field(output_processor=TakeFirst(), input_processor=MapCompose(clear_price))
     url = scrapy.Field(output_processor=TakeFirst())
     photos = scrapy.Field()
+
+
+class LeroymerlinruItem(scrapy.Item):
+    name = scrapy.Field(output_processor=TakeFirst())
+    photos = scrapy.Field()
+    url = scrapy.Field(output_processor=TakeFirst())
+    price = scrapy.Field(output_processor=TakeFirst())

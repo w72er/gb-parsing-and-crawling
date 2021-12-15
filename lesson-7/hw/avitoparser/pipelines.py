@@ -9,6 +9,13 @@ import scrapy
 from itemadapter import ItemAdapter
 from scrapy.pipelines.images import ImagesPipeline
 
+
+class LeroymerlinruSpiderPipeline:
+    def process_item(self, item, spider):
+        print(dict(item))
+        return item
+
+
 class AvitoparserPipeline:
     def process_item(self, item, spider):
         print()

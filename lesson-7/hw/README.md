@@ -10,6 +10,9 @@
 
 ## Зависимости
 
+
+`chropath`
+
 ```shell
 pip install scrapy
 pip install pillow

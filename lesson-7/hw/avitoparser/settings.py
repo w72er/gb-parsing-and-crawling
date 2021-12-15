@@ -68,8 +68,10 @@ COOKIES_ENABLED = True
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-    'avitoparser.pipelines.AvitoparserPipeline': 300,
-    'avitoparser.pipelines.AvitoPhotosPipeline': 200
+    # 'avitoparser.pipelines.AvitoparserPipeline': 300,
+    # 'avitoparser.pipelines.AvitoPhotosPipeline': 200
+
+    'avitoparser.pipelines.LeroymerlinruSpiderPipeline': 200,
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)
