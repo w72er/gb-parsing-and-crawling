@@ -13,7 +13,7 @@ if __name__ == '__main__':
     process = CrawlerProcess(settings=crawler_settings)
     # search = input('')
     search = 'вафли+say+cheese'  # "квартиры"
-    # process.crawl(AvitoSpider, search=search)
+    process.crawl(AvitoSpider, search=search)
     # 'okna-i-dveri' or 'garazhnye-vorota-i-rolstavni'
     process.crawl(LeroymerlinruSpider, catalogue='garazhnye-vorota-i-rolstavni')
     process.start()
