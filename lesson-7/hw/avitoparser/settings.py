@@ -17,6 +17,9 @@ LOG_LEVEL = 'DEBUG'
 
 IMAGES_STORE = 'photos'
 
+MONGO_URI = 'mongodb://localhost:27017'
+MONGO_DATABASE = 'lesson7hw'
+
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) ' \
              'Chrome/92.0.4515.131 Safari/537.36 '
@@ -68,6 +71,7 @@ COOKIES_ENABLED = True
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
+    'avitoparser.pipelines.MongoPipeline': 400,
     'avitoparser.pipelines.LeroymerlinruParserPipeline': 300,
     'avitoparser.pipelines.AvitoparserPipeline': 300,
     'avitoparser.pipelines.AvitoPhotosPipeline': 200,
