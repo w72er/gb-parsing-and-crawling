@@ -1,7 +1,5 @@
-
 from pprint import pprint
 from pymongo import MongoClient
-from pymongo.errors import DuplicateKeyError
 
 
 class UsersDb:
@@ -28,16 +26,34 @@ class UsersDb:
         self.client.close()
 
     def add(self, user):
-        # find_by_user_id = {'_id': user['_id']}
-        # self.users.update_one(find_by_user_id, {'$set': user})
-        self.users.insert_one(user)
-        # todo: а как добавить подписчика, если перезаписывать?
+        self.users.update_one(
+            {'_id': user['_id']},
+            {'$set': {"_id": user['_id'], "name": user['name'], "photo": user['photo'],
+                      "following": [], "followers": []}},
+            upsert=True)
 
     def get_all(self):
         return self.users.find({})
 
+    def get_followings(self, user_id):
+        """ На кого я подписан """
+        return self.users.find({'following': {'$in': [user_id]}})
+
+    def add_followings_to_user(self, user_id, following_ids):
+        self.users.update_many(
+            {'_id': {'$in': following_ids}},
+            {'$push': {'following': user_id}}
+        )
+
     def get_followers(self, user_id):
-        return self.users.find({'following'})
+        """ На кого я подписан """
+        return self.users.find({'followers': {'$in': [user_id]}})
+
+    def add_followers_to_user(self, user_id, follower_ids):
+        self.users.update_many(
+            {'_id': {'$in': follower_ids}},
+            {'$push': {'followers': user_id}}
+        )
 
 
 if __name__ == '__main__':
@@ -45,8 +61,38 @@ if __name__ == '__main__':
         users_db.users.drop()
 
         users_db.add({"_id": "1", "name": "Ivan Petrov", "photo": "https://insta.com/photos/2A39BC328E.jpeg"})
-        users_db.add({"_id": "2", "name": "Petr Sidorov", "photo": "https://insta.com/photos/2A39BC328E.jpeg"})
+        users_db.add({"_id": "2", "name": "Petr Suvorov", "photo": "https://insta.com/photos/2A39BC328E.jpeg"})
         users_db.add({"_id": "3", "name": "Sidr Ivanov", "photo": "https://insta.com/photos/2A39BC328E.jpeg"})
 
-        for user in users_db.get_all():
+        # 1 пользователь подписан на 2 и 3
+        # 2 пользователь подписан на 3
+        # 3 пользователь подписан на 2 и 1
+        users_db.add_followings_to_user('1', ['2', '3'])
+        users_db.add_followings_to_user('2', ['3'])
+        users_db.add_followings_to_user('3', ['1', '2'])
+
+        # на пользователя 1 подписались 2
+        # на пользователя 2 подписались 1, 3
+        # на пользователя 3 подписались []
+        users_db.add_followers_to_user('1', ['2'])
+        users_db.add_followers_to_user('2', ['1', '3'])
+        users_db.add_followers_to_user('3', [])
+
+        # users_db.add({
+        #     "_id": "1", "name": "Ivan Petrov", "photo": "https://insta.com/photos/2A39BC328E.jpeg",
+        #     "following": [3],
+        #     "followers": [2]})
+        # users_db.add({
+        #     "_id": "2", "name": "Petr Suvorov", "photo": "https://insta.com/photos/2A39BC328E.jpeg",
+        #     "following": [1, 3],
+        #     "followers": [1]})
+        # users_db.add({
+        #     "_id": "3", "name": "Sidr Ivanov", "photo": "https://insta.com/photos/2A39BC328E.jpeg",
+        #     "following": [1, 2],
+        #     "followers": [2]})
+
+        # for user in users_db.get_all():
+        #     pprint(user)
+
+        for user in users_db.get_followers('1'):
             pprint(user)
