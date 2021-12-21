@@ -6,6 +6,8 @@ from scrapy.http import HtmlResponse
 from typing import List
 import re
 
+from instaparser.items import InstaHwItem
+
 
 class InstaHwSpider(scrapy.Spider):
     name = 'insta_hw'
@@ -78,10 +80,14 @@ class InstaHwSpider(scrapy.Spider):
                 cb_kwargs={'user_a': user_a}
             )
 
-        following_users = map(
+        following_users = list(map(
             lambda user: {'_id': user['pk'], 'username': user['username'], 'photo': user['profile_pic_url']},
-            j_data['users'])
+            j_data['users']))
 
-        result = {'user_a': user_a, 'following_users': list(following_users)}
+        result = {'user_a': user_a, 'following_users': following_users}
         pprint(result)
-        yield result  # todo: Item
+
+        item = InstaHwItem()
+        item['user_a'] = user_a
+        item['following_users'] = following_users
+        yield item
