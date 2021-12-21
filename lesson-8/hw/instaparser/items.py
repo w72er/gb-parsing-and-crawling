@@ -15,7 +15,6 @@ class InstaparserItem(scrapy.Item):
     post_data = scrapy.Field()
 
 
-
-
-
-
+class InstaHwItem(scrapy.Item):
+    user_a = scrapy.Field()
+    following_users = scrapy.Field()
