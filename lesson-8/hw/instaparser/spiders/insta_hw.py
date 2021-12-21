@@ -3,7 +3,7 @@ from pprint import pprint
 
 import scrapy
 from scrapy.http import HtmlResponse
-from typing import Iterator, List
+from typing import List
 import re
 
 
@@ -67,6 +67,17 @@ class InstaHwSpider(scrapy.Spider):
 
     def following_user_parse(self, response: HtmlResponse, user_a):
         j_data = response.json()
+
+        next_max_id = j_data.get('next_max_id')
+        if next_max_id:
+            user_id = user_a["_id"]
+            yield response.follow(
+                f'https://i.instagram.com/api/v1/friendships/{user_id}/following/?count=12&max_id={next_max_id}',
+                headers={'User-Agent': 'Instagram 155.0.0.37.107'},
+                callback=self.following_user_parse,
+                cb_kwargs={'user_a': user_a}
+            )
+
         following_users = map(
             lambda user: {'_id': user['pk'], 'username': user['username'], 'photo': user['profile_pic_url']},
             j_data['users'])
@@ -74,23 +85,3 @@ class InstaHwSpider(scrapy.Spider):
         result = {'user_a': user_a, 'following_users': list(following_users)}
         pprint(result)
         yield result  # todo: Item
-
-    def parse_user_by_user_id(self):
-        pass
-
-    # @staticmethod
-    # def user_parse(response: HtmlResponse, user_id: str):
-    #     """
-    #         yield response.follow(
-    #             f'https://i.instagram.com/api/v1/users/{user_id}/info/',
-    #             headers={'User-Agent': 'Instagram 155.0.0.37.107'},
-    #             callback=self.user_parse,
-    #             cb_kwargs={'user_id': user_id}
-    #         )
-    #     """
-    #     j_data = response.json()
-    #     j_user = j_data['user']
-    #     user_a = {'_id': j_user['pk'], 'username': j_user['username'], 'photo': j_user['profile_pic_url']}
-    #     pprint('user_a', user_a)
-    #     yield user_a
-
