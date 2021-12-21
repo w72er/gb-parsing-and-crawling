@@ -7,6 +7,6 @@ from instaparser.spiders.instagram import InstaSpider
 
 if __name__ == '__main__':
     process = CrawlerProcess(get_project_settings())
-    process.crawl(InstaSpider)
+    # process.crawl(InstaSpider)
     process.crawl(InstaHwSpider, usernames=['pakjimin47', 'vasilisa_vasyx.x.x', 'sharapgplieva24'])
     process.start()
