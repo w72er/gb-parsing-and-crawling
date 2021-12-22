@@ -14,13 +14,18 @@ class InstaHwSpider(scrapy.Spider):
     allowed_domains = ['instagram.com']
 
     start_urls = ['https://www.instagram.com/']
-    inst_login_link = '	https://www.instagram.com/accounts/login/ajax/'
+    inst_login_link = 'https://www.instagram.com/accounts/login/ajax/'
     inst_login = 'Onliskill_udm'
     inst_pwd = '#PWD_INSTAGRAM_BROWSER:10:1638551736:AedQAFI0vAAYTOunJJUOmrJPoJO3A6MjtJf+QOH/3ovuYhh9eIlQNGUh2MDiWMtQL80BL3LJqk7DfHobv+o7STw2Qg6qLwcDSuHFLa+tiYoPvNwdkG6zno3Y6Pr/Et12HLssUesjh66gbKA/Regr'
 
     def __init__(self, usernames: List[str], **kwargs):
         super().__init__(**kwargs)
         self.usernames = usernames
+
+    def errback_parse(self, failure):
+        # log all failures
+        # b'{"message":"checkpoint_required","checkpoint_url":"/challenge/AXHJpoj7oqaEivU56ekqb9limASPuP81OWwekk4QMuyKnY2DnlJIOP_UVfIPA6nf3OooGA/QJ45g90XrB/","lock":false,"flow_render_type":0,"status":"fail"}'
+        pass
 
     def parse(self, response: HtmlResponse, **kwargs):
         """
@@ -31,6 +36,7 @@ class InstaHwSpider(scrapy.Spider):
         yield scrapy.FormRequest(self.inst_login_link,
                                  method='POST',
                                  callback=self.login,
+                                 errback=self.errback_parse,
                                  formdata={'username': self.inst_login,
                                            'enc_password': self.inst_pwd},
                                  headers={'X-CSRFToken': csrf})
