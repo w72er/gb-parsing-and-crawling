@@ -93,7 +93,5 @@ class InstaHwSpider(scrapy.Spider):
         result = {'user_a': user_a, 'following_users': following_users}
         pprint(result)
 
-        item = InstaHwItem()
-        item['user_a'] = user_a
-        item['following_users'] = following_users
+        item = InstaHwItem(user_a=user_a, following_users=following_users)
         yield item

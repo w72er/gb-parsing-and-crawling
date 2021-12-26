@@ -28,7 +28,7 @@ class UsersDb:
     def add(self, user):
         self.users.update_one(
             {'_id': user['_id']},
-            {'$set': {"_id": user['_id'], "name": user['name'], "photo": user['photo'],
+            {'$set': {"_id": user['_id'], "username": user['username'], "photo": user['photo'],
                       "following": [], "followers": []}},
             upsert=True)
 
@@ -60,9 +60,9 @@ if __name__ == '__main__':
     with UsersDb() as users_db:
         users_db.users.drop()
 
-        users_db.add({"_id": "1", "name": "Ivan Petrov", "photo": "https://insta.com/photos/2A39BC328E.jpeg"})
-        users_db.add({"_id": "2", "name": "Petr Suvorov", "photo": "https://insta.com/photos/2A39BC328E.jpeg"})
-        users_db.add({"_id": "3", "name": "Sidr Ivanov", "photo": "https://insta.com/photos/2A39BC328E.jpeg"})
+        users_db.add({"_id": "1", "username": "Ivan Petrov", "photo": "https://insta.com/photos/2A39BC328E.jpeg"})
+        users_db.add({"_id": "2", "username": "Petr Suvorov", "photo": "https://insta.com/photos/2A39BC328E.jpeg"})
+        users_db.add({"_id": "3", "username": "Sidr Ivanov", "photo": "https://insta.com/photos/2A39BC328E.jpeg"})
 
         # 1 пользователь подписан на 2 и 3
         # 2 пользователь подписан на 3
@@ -79,15 +79,15 @@ if __name__ == '__main__':
         users_db.add_followers_to_user('3', [])
 
         # users_db.add({
-        #     "_id": "1", "name": "Ivan Petrov", "photo": "https://insta.com/photos/2A39BC328E.jpeg",
+        #     "_id": "1", "username": "Ivan Petrov", "photo": "https://insta.com/photos/2A39BC328E.jpeg",
         #     "following": [3],
         #     "followers": [2]})
         # users_db.add({
-        #     "_id": "2", "name": "Petr Suvorov", "photo": "https://insta.com/photos/2A39BC328E.jpeg",
+        #     "_id": "2", "username": "Petr Suvorov", "photo": "https://insta.com/photos/2A39BC328E.jpeg",
         #     "following": [1, 3],
         #     "followers": [1]})
         # users_db.add({
-        #     "_id": "3", "name": "Sidr Ivanov", "photo": "https://insta.com/photos/2A39BC328E.jpeg",
+        #     "_id": "3", "username": "Sidr Ivanov", "photo": "https://insta.com/photos/2A39BC328E.jpeg",
         #     "following": [1, 2],
         #     "followers": [2]})
 
