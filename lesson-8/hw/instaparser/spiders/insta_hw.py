@@ -1,6 +1,4 @@
 import json
-from pprint import pprint
-
 import scrapy
 from scrapy.http import HtmlResponse
 from typing import List
@@ -53,17 +51,15 @@ class InstaHwSpider(scrapy.Spider):
             for username in self.usernames:
                 yield response.follow(
                     f'/{username}',
-                    callback=self.parse_user_by_username,
-                    cb_kwargs={'username': username}
+                    callback=self.parse_a_user
                 )
 
-    def parse_user_by_username(self, response: HtmlResponse, username: str):
+    def parse_a_user(self, response: HtmlResponse):
+        """ Получить данные пользователя a_user со страницы /{username}. """
         _sharedData_as_str = response.xpath('//*[contains(text(), "_sharedData")]')[0].get()[52:-10]
         j_user = json.loads(_sharedData_as_str)['entry_data']['ProfilePage'][0]['graphql']['user']
         user_id = j_user['id']
-        user_a = {'_id': user_id, 'username': j_user['username'], 'photo': j_user['profile_pic_url']}
-        print('user_a')
-        pprint(user_a)
+        a_user = {'_id': user_id, 'username': j_user['username'], 'photo': j_user['profile_pic_url']}
 
         follow_urls = [
             f'https://i.instagram.com/api/v1/friendships/{user_id}/following/?count=12',
@@ -72,11 +68,16 @@ class InstaHwSpider(scrapy.Spider):
             yield response.follow(
                 url,
                 headers={'User-Agent': 'Instagram 155.0.0.37.107'},
-                callback=self.b_users_parse,
-                cb_kwargs={'user_a': user_a}
+                callback=self.parse_b_users,
+                cb_kwargs={'a_user': a_user}
             )
 
-    def b_users_parse(self, response: HtmlResponse, a_user):
+    def parse_b_users(self, response: HtmlResponse, a_user):
+        """
+        Получить b_users подписчиков или на кого подписан пользователь a_user.
+        Определить пользователей подписчики или те, на кого подписан нужно из запроса
+        по вхождению подстроки 'following' или 'followers'.
+        """
         j_data = response.json()
 
         next_max_id = j_data.get('next_max_id')
@@ -85,8 +86,8 @@ class InstaHwSpider(scrapy.Spider):
             yield response.follow(
                 self.get_b_users_url(response.url, user_id, next_max_id),
                 headers={'User-Agent': 'Instagram 155.0.0.37.107'},
-                callback=self.b_users_parse,
-                cb_kwargs={'user_a': a_user}
+                callback=self.parse_b_users,
+                cb_kwargs={'a_user': a_user}
             )
 
         b_users = list(map(
@@ -105,8 +106,6 @@ class InstaHwSpider(scrapy.Spider):
     @staticmethod
     def create_insta_hw_item(a_user, b_users, url) -> InstaHwItem:
         if url.find('/following') != -1:
-            item = InstaHwItem(user_a=a_user, following_users=b_users, follower_users=[])
-            yield item
-        elif url.find('/followers') != -1:
-            item = InstaHwItem(user_a=a_user, following_users=[], follower_users=b_users)
-            yield item
+            return InstaHwItem(user_a=a_user, following_users=b_users, follower_users=[])
+        if url.find('/followers') != -1:
+            return InstaHwItem(user_a=a_user, following_users=[], follower_users=b_users)
