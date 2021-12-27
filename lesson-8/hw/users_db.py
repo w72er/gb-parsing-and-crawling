@@ -45,6 +45,25 @@ class UsersDb:
             {'$push': {'following': user_id}}
         )
 
+    def add_relation(self, a_user, b_users, relation='following'):
+        """
+        Добавляет подписчика, или профиль на который подписан пользователь.
+        :param a_user: пользователь
+        :param b_users: пользовали с которыми требуется указать взаимоотношение
+        :param relation: отношение ('following' | 'followers')
+        """
+        if len(b_users) == 0:
+            return
+
+        for user in [a_user] + b_users:
+            self.add(user)
+
+        b_user_ids = list(map(lambda u: u['_id'], b_users))
+        self.users.update_many(
+            {'_id': {'$in': b_user_ids}},
+            {'$push': {relation: a_user['_id']}}
+        )
+
     def get_followers(self, user_id):
         """ На кого я подписан """
         return self.users.find({'followers': {'$in': [user_id]}})
@@ -94,5 +113,5 @@ if __name__ == '__main__':
         # for user in users_db.get_all():
         #     pprint(user)
 
-        for user in users_db.get_followers('1'):
-            pprint(user)
+        for follower in users_db.get_followers('1'):
+            pprint(follower)
