@@ -18,3 +18,4 @@ class InstaparserItem(scrapy.Item):
 class InstaHwItem(scrapy.Item):
     user_a = scrapy.Field()
     following_users = scrapy.Field()
+    follower_users = scrapy.Field()

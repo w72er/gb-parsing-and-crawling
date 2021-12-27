@@ -69,20 +69,34 @@ class InstaHwSpider(scrapy.Spider):
         yield response.follow(
             following_url,
             headers={'User-Agent': 'Instagram 155.0.0.37.107'},
-            callback=self.following_user_parse,
+            callback=self.b_users_parse,
             cb_kwargs={'user_a': user_a}
         )
 
-    def following_user_parse(self, response: HtmlResponse, user_a):
+        followers_url = f'https://i.instagram.com/api/v1/friendships/{user_id}/followers/?count=12&search_surface=follow_list_page'
+        yield response.follow(
+            followers_url,
+            headers={'User-Agent': 'Instagram 155.0.0.37.107'},
+            callback=self.b_users_parse,
+            cb_kwargs={'user_a': user_a}
+        )
+
+    def b_users_parse(self, response: HtmlResponse, user_a):
         j_data = response.json()
 
         next_max_id = j_data.get('next_max_id')
         if next_max_id:
             user_id = user_a["_id"]
+            url1 = None
+            if response.url.find('/following') != -1:
+                url1 = f'https://i.instagram.com/api/v1/friendships/{user_id}/following/?count=12&max_id={next_max_id}'
+            elif response.url.find('/followers') != -1:
+                url1 = f'https://i.instagram.com/api/v1/friendships/{user_id}/followers/?count=12&max_id={next_max_id}&search_surface=follow_list_page'
+
             yield response.follow(
-                f'https://i.instagram.com/api/v1/friendships/{user_id}/following/?count=12&max_id={next_max_id}',
+                url1,
                 headers={'User-Agent': 'Instagram 155.0.0.37.107'},
-                callback=self.following_user_parse,
+                callback=self.b_users_parse,
                 cb_kwargs={'user_a': user_a}
             )
 
@@ -93,5 +107,9 @@ class InstaHwSpider(scrapy.Spider):
         result = {'user_a': user_a, 'following_users': following_users}
         pprint(result)
 
-        item = InstaHwItem(user_a=user_a, following_users=following_users)
-        yield item
+        if response.url.find('/following') != -1:
+            item = InstaHwItem(user_a=user_a, following_users=following_users, follower_users=[])
+            yield item
+        elif response.url.find('/followers') != -1:
+            item = InstaHwItem(user_a=user_a, following_users=[], follower_users=following_users)
+            yield item
