@@ -65,51 +65,48 @@ class InstaHwSpider(scrapy.Spider):
         print('user_a')
         pprint(user_a)
 
-        following_url = f'https://i.instagram.com/api/v1/friendships/{user_id}/following/?count=12'
-        yield response.follow(
-            following_url,
-            headers={'User-Agent': 'Instagram 155.0.0.37.107'},
-            callback=self.b_users_parse,
-            cb_kwargs={'user_a': user_a}
-        )
-
-        followers_url = f'https://i.instagram.com/api/v1/friendships/{user_id}/followers/?count=12&search_surface=follow_list_page'
-        yield response.follow(
-            followers_url,
-            headers={'User-Agent': 'Instagram 155.0.0.37.107'},
-            callback=self.b_users_parse,
-            cb_kwargs={'user_a': user_a}
-        )
-
-    def b_users_parse(self, response: HtmlResponse, user_a):
-        j_data = response.json()
-
-        next_max_id = j_data.get('next_max_id')
-        if next_max_id:
-            user_id = user_a["_id"]
-            url1 = None
-            if response.url.find('/following') != -1:
-                url1 = f'https://i.instagram.com/api/v1/friendships/{user_id}/following/?count=12&max_id={next_max_id}'
-            elif response.url.find('/followers') != -1:
-                url1 = f'https://i.instagram.com/api/v1/friendships/{user_id}/followers/?count=12&max_id={next_max_id}&search_surface=follow_list_page'
-
+        follow_urls = [
+            f'https://i.instagram.com/api/v1/friendships/{user_id}/following/?count=12',
+            f'https://i.instagram.com/api/v1/friendships/{user_id}/followers/?count=12&search_surface=follow_list_page']
+        for url in follow_urls:
             yield response.follow(
-                url1,
+                url,
                 headers={'User-Agent': 'Instagram 155.0.0.37.107'},
                 callback=self.b_users_parse,
                 cb_kwargs={'user_a': user_a}
             )
 
-        following_users = list(map(
+    def b_users_parse(self, response: HtmlResponse, a_user):
+        j_data = response.json()
+
+        next_max_id = j_data.get('next_max_id')
+        if next_max_id:
+            user_id = a_user["_id"]
+            yield response.follow(
+                self.get_b_users_url(response.url, user_id, next_max_id),
+                headers={'User-Agent': 'Instagram 155.0.0.37.107'},
+                callback=self.b_users_parse,
+                cb_kwargs={'user_a': a_user}
+            )
+
+        b_users = list(map(
             lambda user: {'_id': user['pk'], 'username': user['username'], 'photo': user['profile_pic_url']},
             j_data['users']))
 
-        result = {'user_a': user_a, 'following_users': following_users}
-        pprint(result)
+        yield self.create_insta_hw_item(a_user, b_users, response.url)
 
-        if response.url.find('/following') != -1:
-            item = InstaHwItem(user_a=user_a, following_users=following_users, follower_users=[])
+    @staticmethod
+    def get_b_users_url(response_url, user_id, next_max_id):
+        if response_url.find('/following') != -1:
+            return f'https://i.instagram.com/api/v1/friendships/{user_id}/following/?count=12&max_id={next_max_id}'
+        if response_url.find('/followers') != -1:
+            return f'https://i.instagram.com/api/v1/friendships/{user_id}/followers/?count=12&max_id={next_max_id}&search_surface=follow_list_page'
+
+    @staticmethod
+    def create_insta_hw_item(a_user, b_users, url) -> InstaHwItem:
+        if url.find('/following') != -1:
+            item = InstaHwItem(user_a=a_user, following_users=b_users, follower_users=[])
             yield item
-        elif response.url.find('/followers') != -1:
-            item = InstaHwItem(user_a=user_a, following_users=[], follower_users=following_users)
+        elif url.find('/followers') != -1:
+            item = InstaHwItem(user_a=a_user, following_users=[], follower_users=b_users)
             yield item
